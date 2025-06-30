@@ -18,3 +18,38 @@ erl_crash.dump
 
 # Also ignore archive artifacts (built via "mix archive.build").
 *.ez
+
+# Dialyzer PLT files
+/priv/plts
+
+# Temporary files, for example, from tests.
+/tmp
+
+# LiveBook notebooks
+*.livemd
+
+# Environment variables
+.env
+.env.local
+
+# IDE files
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# NIF shared objects
+priv/*.so
+priv/*.dll
+priv/*.dylib
+
+# Legacy CI files (deprecated)
+.travis.yml
+.provision.travis.sh

@@ -13,24 +13,27 @@ defmodule Mix.Tasks.Compile.Libpostal do
   end
 end
 
-defmodule Expostal.Mixfile do
+defmodule Expostal.MixProject do
   use Mix.Project
 
   def project do
-    [app: :expostal,
-     version: "0.2.0",
-     elixir: "~> 1.4",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     compilers: [:libpostal, :elixir, :app],
-     docs: [main: "readme",
-       extras: ["README.md"]],
-     deps: deps(),
-     description: description(),
-     package: package(),
-     name: "Expostal",
-     source_url: "https://github.com/SweetIQ/expostal",
-     homepage_url: "https://github.com/SweetIQ/expostal"]
+    [
+      app: :expostal,
+      version: "0.2.1",
+      elixir: "~> 1.15",
+      start_permanent: Mix.env() == :prod,
+      compilers: [:libpostal, :elixir, :app],
+      docs: [
+        main: "readme",
+        extras: ["README.md"]
+      ],
+      deps: deps(),
+      description: description(),
+      package: package(),
+      name: "Expostal",
+      source_url: "https://github.com/SweetIQ/expostal",
+      homepage_url: "https://github.com/SweetIQ/expostal"
+    ]
   end
 
   # Configuration for the OTP application
@@ -38,7 +41,7 @@ defmodule Expostal.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     # Specify extra applications you'll use from Erlang/Elixir
-    []
+    [extra_applications: [:logger]]
   end
 
   # Dependencies can be Hex packages:
@@ -52,8 +55,8 @@ defmodule Expostal.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:ex_doc, "~> 0.14", only: :dev, runtime: false},
-      {:dialyxir, "~> 0.5", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.34", only: :dev, runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev], runtime: false}
     ]
   end
 
@@ -63,6 +66,7 @@ defmodule Expostal.Mixfile do
     Expostal parses street address and expand address acroymes with high accuracy.
     """
   end
+
   defp package do
     # These are the default files included in the package
     [
