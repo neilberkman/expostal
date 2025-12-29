@@ -13,6 +13,8 @@ jobs:
   test:
     name: Test on Elixir ${{matrix.elixir}} / OTP ${{matrix.otp}}
     runs-on: ubuntu-latest
+    env:
+      LD_LIBRARY_PATH: /usr/local/lib
 
     strategy:
       matrix:
@@ -92,8 +94,6 @@ jobs:
 
       - name: Run tests
         run: mix test
-        env:
-          LD_LIBRARY_PATH: /usr/local/lib
 
       - name: Check formatting
         if: matrix.elixir == '1.18.4' && matrix.otp == '28.0'
