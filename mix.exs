@@ -1,40 +1,40 @@
-defmodule Mix.Tasks.Compile.Libpostal do
-  def run(_) do
-    if match? {:win32, _}, :os.type do
-      # libpostal does not support Windows unfortunately.
-      IO.warn("Windows is not supported.")
-      exit(1)
-    else
-      File.mkdir_p("priv")
-      {result, _error_code} = System.cmd("make", ["priv/expostal.so"], stderr_to_stdout: true)
-      IO.binwrite result
-    end
-    :ok
-  end
-end
-
 defmodule Expostal.MixProject do
   use Mix.Project
+
+  @version "0.3.0"
+  @source_url "https://github.com/neilberkman/expostal"
 
   def project do
     [
       app: :expostal,
-      version: "0.2.1",
-      elixir: "~> 1.15",
+      version: @version,
+      elixir: "~> 1.15 or ~> 1.16 or ~> 1.17 or ~> 1.18",
       start_permanent: Mix.env() == :prod,
-      compilers: [:libpostal, :elixir, :app],
-      docs: [
-        main: "readme",
-        extras: ["README.md"]
+      compilers: Mix.compilers(),
+      make_precompiler: {:nif, CCPrecompiler},
+      make_precompiler_url: "#{@source_url}/releases/download/v#{@version}/@{artefact_filename}",
+      make_precompiler_filename: "expostal_nif",
+      make_precompiler_nif_versions: [versions: ["2.16", "2.17"]],
+      cc_precompiler: [
+        cleanup: true
       ],
+      elixirc_paths: elixirc_paths(Mix.env()),
+      docs: docs(),
       deps: deps(),
       description: description(),
       package: package(),
+      dialyzer: [
+        plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
+        plt_add_apps: [:mix]
+      ],
       name: "Expostal",
-      source_url: "https://github.com/SweetIQ/expostal",
-      homepage_url: "https://github.com/SweetIQ/expostal"
+      source_url: @source_url,
+      homepage_url: @source_url
     ]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   # Configuration for the OTP application
   #
@@ -55,8 +55,16 @@ defmodule Expostal.MixProject do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
+      # NIF building and precompilation
+      {:elixir_make, "~> 0.9.0", runtime: false},
+      {:cc_precompiler, "~> 0.1.0", runtime: false},
+
+      # Development tools
       {:ex_doc, "~> 0.34", only: :dev, runtime: false},
-      {:dialyxir, "~> 1.4", only: [:dev], runtime: false}
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
+      {:quokka, "~> 2.7", only: [:dev, :test], runtime: false},
+      {:excoveralls, "~> 0.18", only: :test, runtime: false}
     ]
   end
 
@@ -68,13 +76,33 @@ defmodule Expostal.MixProject do
   end
 
   defp package do
-    # These are the default files included in the package
     [
       name: :expostal,
-      files: ["src", "lib", "mix.exs", "README*", "LICENSE*", "Makefile"],
+      files: [
+        "src",
+        "lib",
+        "mix.exs",
+        "README*",
+        "LICENSE*",
+        "Makefile",
+        "Makefile.*",
+        "checksum.exs"
+      ],
       maintainers: ["Meng Xuan Xia"],
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/SweetIQ/expostal"}
+      links: %{
+        "GitHub" => @source_url,
+        "Original" => "https://github.com/SweetIQ/expostal"
+      }
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      extras: ["README.md", "CHANGELOG.md"],
+      source_ref: "v#{@version}",
+      source_url: @source_url
     ]
   end
 end
