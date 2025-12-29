@@ -1,14 +1,14 @@
 # ![Elixir](https://hexdocs.pm/ex_unit/assets/logo.png) expostal
 
-[![CI](https://github.com/SweetIQ/expostal/actions/workflows/ci.yml/badge.svg)](https://github.com/SweetIQ/expostal/actions/workflows/ci.yml)
+[![CI](https://github.com/neilberkman/expostal/actions/workflows/ci.yml/badge.svg)](https://github.com/neilberkman/expostal/actions/workflows/ci.yml)
 [![Hex.pm](https://img.shields.io/hexpm/v/expostal.svg)](https://hex.pm/packages/expostal)
 [![Documentation](https://img.shields.io/badge/docs-hexpm-blue.svg)](https://hexdocs.pm/expostal)
-[![License](https://img.shields.io/github/license/sweetiq/expostal.svg)](https://github.com/SweetIQ/expostal/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/neilberkman/expostal.svg)](https://github.com/neilberkman/expostal/blob/master/LICENSE)
 
-Elixir binding for [Libpostal] - a library for parsing/normalizing street addresses around the world. 
+Elixir binding for [Libpostal] - a library for parsing/normalizing street addresses around the world.
 Powered by statistical NLP and open geo data.
 
-Tutorial on how to write Elixir/Erlang NIF: http://cs.mcgill.ca/~mxia3/2017/06/18/tutorial-extending-elixir-with-c-using-NIF/
+**This is a modernized fork of [SweetIQ/expostal](https://github.com/SweetIQ/expostal)** with precompiled NIFs, comprehensive test coverage, and modern tooling.
 
 ## Installation
 
@@ -16,21 +16,33 @@ The package can be installed by adding `expostal` to your list of dependencies i
 
 ```elixir
 def deps do
-  [{:expostal, "~> 0.2.1"}]
+  [{:expostal, "~> 0.3.0"}]
 end
 ```
 
-### Dependencies
+### Precompiled NIFs
 
-Depends on [system-wide installation of libpostal](https://github.com/openvenues/libpostal#installation).
+**New in 0.3.0!** This package now includes precompiled NIFs for:
+
+- Linux x86_64
+- macOS ARM64 (Apple Silicon)
+- macOS x86_64 (Intel)
+
+For these platforms, you can install without needing a C compiler or libpostal development headers.
+
+### System Dependencies
+
+You still need libpostal installed on your system at runtime:
 
 #### macOS
+
 ```bash
 # Install libpostal using Homebrew
 brew install libpostal
 ```
 
 #### Ubuntu/Debian
+
 ```bash
 # Install dependencies
 sudo apt-get install curl autoconf automake libtool pkg-config
@@ -49,7 +61,7 @@ sudo ldconfig  # Linux only
 
 ## Usage
 
-Parsing an address: 
+Parsing an address:
 
 ```elixir
 iex> Expostal.parse_address("615 Rene Levesque Ouest, Montreal, QC, Canada")
@@ -58,7 +70,7 @@ iex> Expostal.parse_address("615 Rene Levesque Ouest, Montreal, QC, Canada")
   road: "rene levesque ouest", state: "qc"}
 ```
 
-Expanding an address: 
+Expanding an address:
 
 ```elixir
 iex> Expostal.expand_address("781 Franklin Ave Crown Hts Brooklyn NY")
@@ -67,16 +79,47 @@ iex> Expostal.expand_address("781 Franklin Ave Crown Hts Brooklyn NY")
   "781 franklin avenue crown heights brooklyn ny"]
 ```
 
+## What's New in 0.3.0
+
+- **Precompiled NIFs** for Linux x86_64, macOS ARM64, and macOS x86_64
+- **Modern tooling**: Credo, Dialyzer, Quokka, ExCoveralls
+- **Comprehensive test suite** with edge cases and error handling
+- **GitHub Actions CI/CD** with test matrix for Elixir 1.15-1.18 and OTP 25-28
+- **Improved documentation** and better error messages
+- All code quality checks passing
+
 ## Requirements
 
-- Elixir 1.15+
-- Erlang/OTP 25+
+- Elixir 1.15-1.18
+- Erlang/OTP 25-28
 - libpostal (system-wide installation required)
 
 ## Documentation
 
 View the docs on [https://hexdocs.pm/expostal](https://hexdocs.pm/expostal), or
 generate the docs locally with `mix docs`.
+
+## Development
+
+```bash
+# Install dependencies
+mix deps.get
+
+# Compile with warnings as errors
+mix compile --warnings-as-errors
+
+# Run tests
+mix test
+
+# Check code quality
+mix credo --strict
+
+# Run type checker
+mix dialyzer
+
+# Format code
+mix format
+```
 
 ## Contributing
 
@@ -85,6 +128,10 @@ generate the docs locally with `mix docs`.
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
+
+## Credits
+
+Original project by [SweetIQ/expostal](https://github.com/SweetIQ/expostal).
 
 ## License
 

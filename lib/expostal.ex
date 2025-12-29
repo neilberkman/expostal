@@ -3,13 +3,13 @@ defmodule Expostal do
   Address parsing and expansion module for Openvenue's Libpostal, which does parses addresses.
   """
 
-  @compile { :autoload, false }
-  @on_load { :init, 0 }
+  @compile {:autoload, false}
+  @on_load {:init, 0}
 
-  app = Mix.Project.config[:app]
+  app = Mix.Project.config()[:app]
 
   defp init do
-    path = :filename.join(:code.priv_dir(unquote(app)), 'expostal')
+    path = :filename.join(:code.priv_dir(unquote(app)), ~c"expostal")
     :ok = :erlang.load_nif(path, 0)
   end
 
@@ -47,8 +47,9 @@ defmodule Expostal do
         road: "rene levesque ouest", state: "qc"}
 
   """
-  @spec parse_address(address :: String.t) :: map
+  @spec parse_address(address :: String.t()) :: map
   def parse_address(address)
+
   def parse_address(_) do
     case :erlang.phash2(1, 1) do
       0 -> raise "Nif not loaded"
@@ -60,17 +61,16 @@ defmodule Expostal do
   Expand given address into a list of expansions
 
   ## Examples
-    iex> Expostal.expand_address("781 Franklin Ave Crown Hts Brooklyn NY")
+    iex> Expostal.expand_address("781 Franklin Ave Crown Hts Brooklyn NY") |> Enum.sort()
     ["781 franklin avenue crown heights brooklyn new york",
      "781 franklin avenue crown heights brooklyn ny"]
 
   """
-  @spec expand_address(address :: String.t) :: [String.t]
+  @spec expand_address(address :: String.t()) :: [String.t()]
   def expand_address(address) do
     case :erlang.phash2(1, 1) do
       0 -> raise "Nif not loaded"
       1 -> [address]
     end
   end
-
 end
