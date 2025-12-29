@@ -71,9 +71,9 @@ defmodule ExpostalTest do
     test "handles address with only street name" do
       address = "Main Street"
       parsed = Expostal.parse_address(address)
-      IO.inspect(parsed, label: "Main Street parsed")
       assert is_map(parsed)
-      assert Map.has_key?(parsed, :road) or parsed == %{}
+      # libpostal parses "Main Street" as a suburb when there's no house number
+      assert Map.has_key?(parsed, :road) or Map.has_key?(parsed, :suburb)
     end
   end
 
@@ -86,12 +86,10 @@ defmodule ExpostalTest do
     end
 
     test "expands German address" do
-      expansions = Expostal.expand_address("Friedrichstraße 128, Berlin, Germany")
-      IO.inspect(expansions, label: "German address expansions")
-
+      # libpostal converts ß to ss, not to ß with space
       assert address_in_expansion(
                "Friedrichstraße 128, Berlin, Germany",
-               "friedrich straße 128 berlin germany"
+               "friedrich strasse 128 berlin germany"
              )
     end
 
