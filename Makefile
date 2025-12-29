@@ -10,7 +10,7 @@ CFLAGS += -I$(ERLANG_PATH)
 
 # libpostal library
 CFLAGS += -I/usr/local/include -I/usr/include
-LDFLAGS += -L/usr/local/lib -L/usr/lib -lpostal
+LDFLAGS += -L/usr/local/lib -L/usr/lib
 
 # Platform-specific flags
 ifeq ($(shell uname),Darwin)
@@ -27,7 +27,7 @@ $(PRIV_DIR):
 	mkdir -p $@
 
 $(NIF_SO): $(PRIV_DIR) src/expostal.c
-	$(CC) $(CFLAGS) -shared $(LDFLAGS) -o $@ src/expostal.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ src/expostal.c -lpostal
 
 clean:
 	$(RM) $(NIF_SO)
