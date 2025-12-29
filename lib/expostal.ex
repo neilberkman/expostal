@@ -61,7 +61,9 @@ defmodule Expostal do
   Expand given address into a list of expansions
 
   ## Examples
-    iex> Expostal.expand_address("781 Franklin Ave Crown Hts Brooklyn NY")
+    iex> expansions = Expostal.expand_address("781 Franklin Ave Crown Hts Brooklyn NY")
+    iex> IO.inspect(expansions, label: "Doctest expansions")
+    iex> Enum.sort(expansions)
     ["781 franklin avenue crown heights brooklyn new york",
      "781 franklin avenue crown heights brooklyn ny"]
 
