@@ -1,0 +1,50 @@
+# Base image containing libpostal static library and data files
+# Build once, push to registry, use as base for app builds
+#
+# Build: docker build -f Dockerfile.libpostal-base -t libpostal-base:1.1 .
+# Push:  docker push ghcr.io/yourorg/libpostal-base:1.1
+
+FROM debian:bookworm-slim AS builder
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    git \
+    autoconf \
+    automake \
+    libtool \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# Clone and build libpostal as static library
+WORKDIR /build
+RUN git clone --depth 1 https://github.com/openvenues/libpostal.git
+
+WORKDIR /build/libpostal
+RUN ./bootstrap.sh && \
+    CFLAGS="-fPIC" CXXFLAGS="-fPIC" ./configure \
+        --enable-static \
+        --disable-shared \
+        --prefix=/usr/local \
+        --datadir=/data && \
+    make -j$(nproc) && \
+    make install
+
+# Download libpostal data (~2GB download, ~3GB extracted)
+RUN mkdir -p /data && \
+    /usr/local/bin/libpostal_data download all /data
+
+# Final base image with just the artifacts we need
+FROM debian:bookworm-slim
+
+# Copy static library and headers
+COPY --from=builder /usr/local/lib/libpostal.a /usr/local/lib/
+COPY --from=builder /usr/local/include/libpostal /usr/local/include/libpostal
+
+# Copy data files
+COPY --from=builder /data /data
+
+# Metadata
+LABEL org.opencontainers.image.source="https://github.com/neilberkman/expostal"
+LABEL org.opencontainers.image.description="libpostal static library and data files"
+LABEL libpostal.version="1.1"

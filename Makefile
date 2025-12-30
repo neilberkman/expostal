@@ -8,15 +8,25 @@ CFLAGS += -O3 -std=gnu99 -fPIC -Wall -Wextra -Wno-unused-parameter -Wno-unused-f
 ERLANG_PATH = $(shell erl -eval 'io:format("~s", [lists:concat([code:root_dir(), "/erts-", erlang:system_info(version), "/include"])])' -s init stop -noshell)
 CFLAGS += -I$(ERLANG_PATH)
 
-# libpostal library
-CFLAGS += -I/usr/local/include -I/usr/include
-LDFLAGS += -L/usr/local/lib -L/usr/lib
+# libpostal prefix (override with LIBPOSTAL_PREFIX=/path)
+LIBPOSTAL_PREFIX ?= /usr/local
+CFLAGS += -I$(LIBPOSTAL_PREFIX)/include
 
-# Platform-specific flags
+# Platform-specific shared library flags
 ifeq ($(shell uname),Darwin)
-	LDFLAGS += -dynamiclib -undefined dynamic_lookup
+	LDFLAGS_SHARED = -dynamiclib -undefined dynamic_lookup
 else
-	LDFLAGS += -shared
+	LDFLAGS_SHARED = -shared
+endif
+
+# Static vs dynamic linking
+# Set LIBPOSTAL_STATIC=1 for static linking (Docker builds)
+ifdef LIBPOSTAL_STATIC
+	LIBPOSTAL_LIB = $(LIBPOSTAL_PREFIX)/lib/libpostal.a
+	LDFLAGS += $(LDFLAGS_SHARED) -lstdc++ -lm
+else
+	LIBPOSTAL_LIB =
+	LDFLAGS += $(LDFLAGS_SHARED) -L$(LIBPOSTAL_PREFIX)/lib -lpostal
 endif
 
 .PHONY: all clean
@@ -27,7 +37,11 @@ $(PRIV_DIR):
 	mkdir -p $@
 
 $(NIF_SO): $(PRIV_DIR) src/expostal.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ src/expostal.c -lpostal
+ifdef LIBPOSTAL_STATIC
+	$(CC) $(CFLAGS) -o $@ src/expostal.c $(LIBPOSTAL_LIB) $(LDFLAGS)
+else
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ src/expostal.c
+endif
 
 clean:
 	$(RM) $(NIF_SO)
